@@ -7,7 +7,7 @@ exports.getPetList = async (req, res) => {
     var result = await connection.dbQuery(petListQuery)
     return res.status(200).send(JSON.stringify(result.rows))
   } catch (err) {
-    return res.status(500).send({ error: "Failed to list pet" })
+    return res.status(400).send({ error: `Failed to list pet; ${err.message}` })
   }
 }
 
