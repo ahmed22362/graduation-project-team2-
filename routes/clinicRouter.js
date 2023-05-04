@@ -1,10 +1,10 @@
-var express =require ('express');
-const router = express.Router();
-var clinicControler = require('../controlers/clinicControler');
+var express = require("express")
+const router = express.Router()
+var clinicController = require("../controllers/clinicController")
 
-router.get("/get_clinic",clinicControler.getClinicList);
-router.post("/add_clinic",clinicControler.addClinic);
-router.put("/update_clinic",clinicControler.updateClinic);
-router.delete("/delete_clinic",clinicControler.deleteClinic);
+router.get("/get_clinic", clinicController.getClinicList)
+router.post("/add_clinic", clinicController.addClinic)
+router.put("/update_clinic", clinicController.updateClinic)
+router.delete("/delete_clinic", clinicController.deleteClinic)
 
 module.exports = router
