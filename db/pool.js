@@ -39,6 +39,7 @@ const checkDb = (flag, typeFlag) => {
           client.query(query.DDLQuery.CREATE_role_type)
           client.query(query.DDLQuery.CREATE_solid_type)
           client.query(query.DDLQuery.CREATE_gender_type)
+          client.query(query.DDLQuery)
         }
         // create tables
         client.query(query.DDLQuery.CREATE_USER_TABLE)
