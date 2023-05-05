@@ -9,21 +9,21 @@ exports.queryList = {
   // solid
   GET_SOLID_LIST_QUERY: "SELECT * FROM solid",
   SAVE_SOLID_QUERY:
-    "INSERT INTO public.solid(name,type, price,country,city,description,image_url,user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)RETURNING",
+    "INSERT INTO public.solid(name,type, price,country,city,description,image_url,user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)RETURNING *;",
   UPDATE_SOLID_QUERY:
-    "UPDATE public.solid SET name=$1, info=$2, image_url=$3, price=$4, user_id=$6, country=$7, city=$8 WHERE id=$9 RETURNING",
+    "UPDATE public.solid SET name=$1, type=$2, price=$3, country=$4, city=$5, description=$6 ,image_url = $7,user_id= $8 WHERE id=$9 RETURNING *",
   DELETE_SOLID_QUERY: "DELETE FROM public.solid WHERE id=$1",
   // clinic
   GET_CLINIC_LIST_QUERY: "SELECT * FROM clinic;",
   SAVE_CLINIC_QUERY:
-    "INSERT INTO public.clinic(name,phone,country,city,rating) VALUES ($1, $2, $3, $4, $5) RETURNING;",
+    "INSERT INTO public.clinic(name,phone,country,city,rating) VALUES ($1, $2, $3, $4, $5) RETURNING * ;",
   UPDATE_CLINIC_QUERY:
-    "UPDATE public.clinic SET  name=$1,phone=$2,country=$3,city=$4,rating=$5, WHERE id =$6 RETURNING;",
+    "UPDATE public.clinic SET  name=$1,phone=$2,country=$3,city=$4,rating=$5 WHERE id =$6 RETURNING *;",
   DELETE_CLINIC_QUERY: "DELETE FROM public.clinic WHERE id=$1;",
 
   GET_USER_QUERY: `SELECT * FROM "user";`,
   SAVE_USER_QUERY:
-    'INSERT INTO "user"(name,email,password,password_confirm,country,city,phone,image_url,role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING name,email,city,phone;',
+    'INSERT INTO "user"(name,email,password,password_confirm,country,city,phone,image_url,role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id,name,email,city,phone,password;',
   UPDATE_USER_QUERY:
     'UPDATE "user" SET  name=$1, phone=$2,image_url=$3,email=$4, country=$5, city=$6 WHERE id=$7 RETURNING name,phone;',
 }
@@ -92,4 +92,20 @@ exports.DDLQuery = {
   PRIMARY KEY (user_id, Solid_ID)
 );
 `,
+  CREATE_POST_TABLE: `
+  CREATE TABLE posts (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES "user"(id),
+  pet_id INTEGER REFERENCES pet(id),
+  likes INTEGER DEFAULT 0
+);
+`,
 }
+exports.selectAllQuery = (table) => `Select * from ${table}`
+exports.selectOneQuery = (table, id) =>
+  `Select * FROM ${table} WHERE id = ${id}`
+exports.selectAllWhereQuery = (table, where) =>
+  `Select * from ${table} where ${where}`
+exports.deleteOneQuery = (table, id) => `DELETE FROM ${table} WHERE id = ${id}`
+exports.deleteWhereQuery = (table, where) =>
+  `DELETE FROM ${table} WHERE ${where}`

@@ -9,7 +9,21 @@ exports.getPetList = async (req, res) => {
     res.status(400).send({ error: `Failed to list pet; ${err.message}` })
   }
 }
-
+exports.getPet = async (req, res) => {
+  try {
+    if (!(await connection.isExist(`pet`, req.params.id))) {
+      return res
+        .status(404)
+        .json({ status: "fail", message: "please provide valid id" })
+    }
+    const result = await connection.dbQuery(
+      query.selectOneQuery(`"pet"`, req.params.id)
+    )
+    res.status(200).json({ status: "successful", data: result.rows })
+  } catch (err) {
+    res.status(500).send({ error: "Failed to get users" })
+  }
+}
 exports.addPet = async (req, res) => {
   try {
     const {
@@ -66,27 +80,28 @@ exports.updatePet = async (req, res) => {
       req.params.id,
     ]
     // check if pet exist
-    const pet = await connection.dbQuery(
-      `select * from pet where id = ${req.params.id}`
-    )
-    if (pet.rows.length == 0) {
-      res
+    if (!(await connection.isExist(`pet`, req.params.id))) {
+      return res
         .status(404)
-        .json({ status: "fail", message: "there are no pet with this id" })
-    } else {
-      const result = await connection.dbQuery(
-        query.queryList.UPDATE_PET_QUERY,
-        values
-      )
-      res.status(200).json({ status: "successful", data: result.rows })
+        .json({ status: "fail", message: "please provide valid id" })
     }
+    const result = await connection.dbQuery(
+      query.queryList.UPDATE_PET_QUERY,
+      values
+    )
+    res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
     res.status(500).send({ error: `Failed to update pet ${err.message}` })
   }
 }
 exports.deletePet = async (req, res) => {
   try {
-    await connection.dbQuery(query.queryList.DELETE_PET_QUERY, req.params.id)
+    if (!(await connection.isExist(`pet`, req.params.id))) {
+      return res
+        .status(404)
+        .json({ status: "fail", message: "please provide valid id" })
+    }
+    await connection.dbQuery(query.deleteOneQuery("pet", req.params.id))
     res.status(201).send("Successfully pet deleted ")
   } catch (err) {
     res.status(500).send({ error: `Failed to delete pet ${err.message}` })

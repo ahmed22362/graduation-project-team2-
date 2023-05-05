@@ -1,90 +1,61 @@
 var query = require("../db/query")
-var Connection = require("../db/connection")
+var connection = require("../db/connection")
 
 exports.getClinicList = async (req, res) => {
   try {
-    var clinicListQuery = query.queryList.GET_CLINIC_LIST_QUERY
-    var result = await Connection.dbQuery(clinicListQuery)
-    return res.status(200).send(JSON.stringify(result.rows))
+    const result = await connection.dbQuery(query.selectAllQuery(`clinic`))
+    res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
-    return res.status(500).send({ error: "Failed to list Clinic" })
+    res.status(500).json({ error: "Failed to list Clinic" })
   }
 }
 
 exports.addClinic = async (req, res) => {
   try {
-    var clinic_id = req.body.clinic_id
-    var phone = req.body.phone
-    var e_mail = req.body.e_mail
-    var rating = req.body.rating
-    var clinic_imge = req.body.clinic_imge
-    var info = req.body.info
-    var country = req.body.country
-    var city = req.body.city
-    var name = req.body.name
-
-    let values = [
-      clinic_id,
-      phone,
-      e_mail,
-      rating,
-      clinic_imge,
-      info,
-      country,
-      city,
-      name,
-    ]
-    var saveClinicQuery = query.queryList.SAVE_CLINIC_QUERY
-    await Connection.dbQuery(saveClinicQuery, values)
-    return res.status(201).send("Successfully Clinic created ")
+    const { name, phone, country, city, rating } = req.body
+    let values = [name, phone, country, city, rating]
+    const result = await connection.dbQuery(
+      query.queryList.SAVE_CLINIC_QUERY,
+      values
+    )
+    res.status(201).json({ status: "successful", data: result.rows })
   } catch (err) {
-    console.log("Error : " + err)
-    return res.status(500).send({ error: "Failed to add Clinic" })
+    res.status(500).json({ error: `Failed to add Clinic ${err.message}` })
   }
 }
 
 exports.updateClinic = async (req, res) => {
   try {
-    var clinic_id = req.body.clinic_id
-    var phone = req.body.phone
-    var e_mail = req.body.e_mail
-    var rating = req.body.rating
-    var clinic_imge = req.body.clinic_imge
-    var info = req.body.info
-    var country = req.body.country
-    var city = req.body.city
-    var name = req.body.name
-
-    let values = [
-      phone,
-      e_mail,
-      rating,
-      clinic_imge,
-      info,
-      country,
-      city,
-      name,
-      clinic_id,
-    ]
-    var updateClinicQuery = query.queryList.UPDATE_CLINIC_QUERY
-    await Connection.dbQuery(updateClinicQuery, values)
-    return res.status(201).send("Successfully Clinic updated ")
+    const { name, phone, country, city, rating } = req.body
+    let values = [name, phone, country, city, rating, req.params.id]
+    if (!(await connection.isExist("clinic", req.params.id))) {
+      return res
+        .status(404)
+        .json({ status: "fail", message: "please provide valid id" })
+    }
+    const result = await connection.dbQuery(
+      query.queryList.UPDATE_CLINIC_QUERY,
+      values
+    )
+    res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
-    console.log("Error : " + err)
-    return res.status(500).send({ error: "Failed to update Clinic" })
+    res.status(500).json({ error: `Failed to update Clinic ${err.message}` })
   }
 }
 exports.deleteClinic = async (req, res) => {
   try {
-    var clinic_id = req.body.clinic_id
-    if (!clinic_id) {
-      return res.status(500).send({ error: "can not delete empty solid" })
+    if (!(await connection.isExist("clinic", req.params.id))) {
+      return res
+        .status(404)
+        .json({ status: "fail", message: "please provide valid id" })
     }
-    var deleteClinicQuery = query.queryList.DELETE_CLINIC_QUERY
-    await Connection.dbQuery(deleteClinicQuery, [clinic_id])
-    return res.status(201).send("Successfully Clinic deleted ")
+    const result = await connection.dbQuery(
+      query.deleteOneQuery("clinic", req.params.id)
+    )
+    res
+      .status(200)
+      .json({ status: "successful", message: "clinic deleted successfully" })
   } catch (err) {
-    console.log("Error : " + err)
-    return res.status(500).send({ error: "Failed to delete Clinic" })
+    res.status(500).json({ error: `Failed to delete Clinic ${err.message}` })
   }
 }

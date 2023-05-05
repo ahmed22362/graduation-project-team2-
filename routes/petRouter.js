@@ -7,5 +7,6 @@ router
   .route("/:id")
   .patch(petController.updatePet)
   .delete(petController.deletePet)
+  .get(petController.getPet)
 
 module.exports = router
