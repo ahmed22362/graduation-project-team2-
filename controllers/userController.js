@@ -3,79 +3,60 @@ var connection = require("../db/connection")
 
 exports.getUsers = async (req, res) => {
   try {
-    var usersQuery = query.queryList.GET_USER_QUERY
-    var result = await connection.dbQuery(usersQuery)
-    return res.status(200).send(JSON.stringify(result.rows))
+    const result = await connection.dbQuery(query.queryList.GET_USER_QUERY)
+    res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
-    return res.status(500).send({ error: "Failed to get user" })
+    res.status(500).send({ error: "Failed to get users" })
   }
 }
 
 exports.addUser = async (req, res) => {
   try {
-    var user_id = req.body.user_id
-    var user_name = req.body.user_name
-    var user_password = req.body.user_password
-    var phone = req.body.phone
-    var imge_user = req.body.imge_user
-    var is_admin = req.body.is_admin
-    var e_mail = req.body.e_mail
-    var country = req.body.country
-    var city = req.body.city
-    var pet_id = req.body.pet_id
-
-    let values = [
-      user_id,
-      user_name,
-      user_password,
-      phone,
-      imge_user,
-      is_admin,
-      e_mail,
+    const {
+      name,
+      email,
+      password,
+      password_confirm,
       country,
       city,
-      pet_id,
+      phone,
+      image_url,
+      role,
+    } = req.body
+    let values = [
+      name,
+      email,
+      password,
+      password_confirm,
+      country,
+      city,
+      phone,
+      image_url,
+      role,
     ]
-    var saveUserQuery = query.queryList.SAVE_USER_QUERY
-    await connection.dbQuery(saveUserQuery, values)
-    return res.status(201).send("Successfully user created ")
+    const result = await connection.dbQuery(
+      query.queryList.SAVE_USER_QUERY,
+      values
+    )
+    res.status(201).json({ status: "successful", data: result.rows })
   } catch (err) {
     console.log("Error : " + err)
-    return res.status(500).send({ error: "Failed to add user" })
+    res.status(500).send({ error: "Failed to add user" })
   }
 }
 
 exports.updateUser = async (req, res) => {
   try {
-    var user_id = req.body.user_id
-    var user_name = req.body.user_name
-    var user_password = req.body.user_password
-    var phone = req.body.phone
-    var imge_user = req.body.imge_user
-    var is_admin = req.body.is_admin
-    var e_mail = req.body.e_mail
-    var country = req.body.country
-    var city = req.body.city
-    var pet_id = req.body.pet_id
-
-    let values = [
-      user_name,
-      user_password,
-      phone,
-      imge_user,
-      is_admin,
-      e_mail,
-      country,
-      city,
-      pet_id,
-      user_id,
-    ]
-    var updateUserQuery = query.queryList.UPDATE_USER_QUERY
-    await connection.dbQuery(updateUserQuery, values)
-    return res.status(201).send("Successfully user updated ")
+    const { name, email, country, city, phone, image_url } = req.body
+    let values = [name, email, country, city, phone, image_url, req.params.id]
+    console.log(values)
+    const result = await connection.dbQuery(
+      query.queryList.UPDATE_USER_QUERY,
+      values
+    )
+    res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
-    console.log("Error : " + err)
-    return res.status(500).send({ error: "Failed to update user" })
+    res.status(500).send({ error: `Failed to update user ${err.message}` })
   }
 }
 
