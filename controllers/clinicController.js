@@ -9,6 +9,21 @@ exports.getClinicList = async (req, res) => {
     res.status(500).json({ error: "Failed to list Clinic" })
   }
 }
+exports.getClinic = async (req, res) => {
+  try {
+    if (!(await connection.isExist("clinic", req.params.id))) {
+      return res
+        .status(404)
+        .json({ status: "fail", message: "please provide valid id" })
+    }
+    const result = await connection.dbQuery(
+      query.selectOneQuery(`clinic`, req.params.id)
+    )
+    res.status(200).json({ status: "successful", data: result.rows })
+  } catch (err) {
+    res.status(500).json({ error: "Failed to list Clinic" })
+  }
+}
 
 exports.addClinic = async (req, res) => {
   try {

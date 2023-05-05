@@ -10,5 +10,6 @@ router
   .route("/:id")
   .patch(solidController.updateSolid)
   .delete(solidController.deleteSolid)
+  .get(solidController.getSolid)
 
 module.exports = router

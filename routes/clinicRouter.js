@@ -10,5 +10,6 @@ router
   .route("/:id")
   .patch(clinicController.updateClinic)
   .delete(clinicController.deleteClinic)
+  .get(clinicController.getClinic)
 
 module.exports = router

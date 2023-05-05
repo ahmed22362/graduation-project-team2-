@@ -9,6 +9,21 @@ exports.getSolidList = async (req, res) => {
     res.status(500).send({ error: "Failed to list solid" })
   }
 }
+exports.getSolid = async (req, res) => {
+  try {
+    if (!(await connection.isExist("solid", req.params.id))) {
+      return res
+        .status(404)
+        .json({ status: "fail", message: "please provide valid id" })
+    }
+    const result = await connection.dbQuery(
+      query.selectOneQuery("solid", req.params.id)
+    )
+    res.status(200).json({ status: "successful", data: result.rows })
+  } catch (err) {
+    res.status(500).send({ error: "Failed to list solid" })
+  }
+}
 
 exports.addSolid = async (req, res) => {
   try {

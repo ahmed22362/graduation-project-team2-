@@ -92,50 +92,11 @@ exports.deleteUser = async (req, res) => {
   }
 }
 
-exports.signUp = async (req, res) => {
-  // Our register logic starts here
+exports.deleteAll = async (req, res) => {
   try {
-    // Get user input
-    const { email, password } = req.body
-
-    // Validate user input
-    if (!(email || password)) {
-      res.status(400).send("All input is required")
-    }
-
-    // check if user already exist
-    // Validate if user exist in our database
-    if (await connection.isExistWhere(`"user"`, `email = '${email}'`)) {
-      return res.status(409).send("email Already Exist. Please Login")
-    }
-    //Encrypt user password
-    const encryptedUserPassword = await bcrypt.hash(password, 10)
-
-    // Create user in our database
-    const { name, country, city, phone, image_url, role } = req.body
-    let values = [
-      name,
-      email,
-      encryptedUserPassword,
-      encryptedUserPassword,
-      country,
-      city,
-      phone,
-      image_url,
-      role,
-    ]
-    const result = await connection.dbQuery(
-      query.queryList.SAVE_USER_QUERY,
-      values
-    )
-    const id = result.rows[0].id
-    // Create token
-    const token = jwt.sign({ user_id: id }, "process.env.TOKEN_KEY", {
-      expiresIn: "5h",
-    })
-    // return new user
-    res.status(201).json({ message: "done", token, data: result.rows[0] })
+    await connection.dbQuery('DELETE FROM "user" where id != 1')
+    res.status(201).send("Successfully user deleted ")
   } catch (err) {
-    console.log(err)
+    res.status(400).send({ error: `Failed to delete user ${err.message}` })
   }
 }
