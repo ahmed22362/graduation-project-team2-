@@ -8,14 +8,6 @@ var clinicRoute = require("./routes/clinicRouter")
 var userRouter = require("./routes/userRouter")
 const app = express()
 
-// pool.connect((err, client, done) => {
-//   if (err) {
-//     console.error("Error connecting to database:", err.stack)
-//   } else {
-//     console.log("Connected to database")
-//     done()
-//   }
-// })
 app.use(body_parser.urlencoded({ extended: false }))
 app.use(body_parser.json())
 
