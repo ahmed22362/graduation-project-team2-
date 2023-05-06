@@ -2,9 +2,14 @@ var express = require("express")
 const router = express.Router()
 var clinicController = require("../controllers/clinicController")
 
-router.get("/get_clinic", clinicController.getClinicList)
-router.post("/add_clinic", clinicController.addClinic)
-router.put("/update_clinic", clinicController.updateClinic)
-router.delete("/delete_clinic", clinicController.deleteClinic)
+router
+  .route("/")
+  .get(clinicController.getClinicList)
+  .post(clinicController.addClinic)
+router
+  .route("/:id")
+  .patch(clinicController.updateClinic)
+  .delete(clinicController.deleteClinic)
+  .get(clinicController.getClinic)
 
 module.exports = router
