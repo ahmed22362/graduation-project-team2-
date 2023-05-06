@@ -3,7 +3,7 @@ var query = require("../db/query")
 var connection = require("../db/connection")
 const bcrypt = require("bcrypt")
 const jwtConfig = require("./../config/jwtConfig")
-const correctPassword = require("./../utils/correctPassword")
+const validator = require("../utils/validator")
 const { promisify } = require("util")
 
 const signToken = (payload) => {
@@ -25,13 +25,27 @@ exports.signUp = async (req, res) => {
   // Our register logic starts here
   try {
     // Get user input
-    const { email, password } = req.body
+    const { email, password, password_confirm } = req.body
 
     // Validate user input
     if (!(email || password)) {
       res.status(400).send("All input is required")
     }
+    const { valid, reason } = await validator.isEmailValid(email)
+    // check if the email is really exist or not
+    // if (!valid) {
+    //   return res.status(400).json({
+    //     status: "fail",
+    //     message: `please enter valid email :${reason}`,
+    //   })
+    // }
 
+    if (password !== password_confirm) {
+      return res.status(400).json({
+        status: "fail",
+        message: "password and password confirm not matched",
+      })
+    }
     // check if user already exist
     // Validate if user exist in our database
     if (await connection.isExistWhere(`"user"`, `email = '${email}'`)) {
@@ -76,7 +90,7 @@ exports.login = async (req, res, next) => {
     const user = await connection.dbQuery(
       query.selectAllWhereQuery(`"user"`, `email = '${email}'`)
     )
-    if (await correctPassword(password, user.rows[0].password)) {
+    if (await validator.correctPassword(password, user.rows[0].password)) {
       connection
         .dbQuery(query.selectAllWhereQuery(`"user"`, `email = '${email}'`))
         .then((result) => {
@@ -116,7 +130,6 @@ exports.protect = async (req, res, next) => {
       .send({ error: `Failed to parse the token ${error.message}` })
   }
   // 3) Check if the user still exist
-  console.log(decoded)
   const result = await connection.dbQuery(
     query.selectOneQuery(`"user"`, decoded.id)
   )
@@ -125,7 +138,7 @@ exports.protect = async (req, res, next) => {
       .status(404)
       .send({ error: `Failed to find the user ${err.message}` })
   }
-  req.user = result
+  req.user = result.rows[0]
   next()
 }
 exports.restrictTo = (...roles) => {

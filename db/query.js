@@ -48,6 +48,8 @@ exports.DDLQuery = {
   phone VARCHAR(255) ,
   image_url VARCHAR(255),
   role role_type DEFAULT 'user'
+  password_reset_code VARCHAR(255),
+  password_reset_expire DATETIME
   );`,
   CREATE_PETS_TABLE: `CREATE TABLE IF NOT EXISTS pet (
   id SERIAL PRIMARY KEY,

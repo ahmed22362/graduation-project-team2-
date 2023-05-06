@@ -7,7 +7,7 @@ router.post("/signup", authController.signUp)
 router.post("/login", authController.login)
 router
   .route("/")
-  .get(authController.protect, userController.getUsers)
+  .get(userController.getUsers)
   .post(userController.addUser)
   .delete(userController.deleteAll)
 router

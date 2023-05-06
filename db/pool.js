@@ -1,15 +1,14 @@
 const { Pool, Client } = require("pg")
-const dotenv = require("dotenv")
+const dbConfig = require("./../config/dbConfig")
 const query = require("./query")
-dotenv.config()
-const connectionString = process.env.ELEPHANT_DATABASE_URL
+
 const db_config = {
-  user: "postgres",
-  host: "localhost",
-  database: "pets_db",
-  password: "22362",
-  port: 5432,
-  // // connectionString: process.env.DATABASE_URL,
+  // user: "postgres",
+  // host: "localhost",
+  // database: "pets_db",
+  // password: "22362",
+  // port: 5432,
+  connectionString: dbConfig.RENDER_URL,
   connectionTimeoutMillie: 300000,
   idleTimeoutMillie: 300000,
   max: 20,
@@ -39,7 +38,7 @@ const checkDb = (flag, typeFlag) => {
           client.query(query.DDLQuery.CREATE_role_type)
           client.query(query.DDLQuery.CREATE_solid_type)
           client.query(query.DDLQuery.CREATE_gender_type)
-          client.query(query.DDLQuery)
+          client.query(query.DDLQuery.CREATE_status_type)
         }
         // create tables
         client.query(query.DDLQuery.CREATE_USER_TABLE)
