@@ -20,5 +20,8 @@
             "username": "postgres",
             "password": "22362"
         }
+    ],
+    "cSpell.words": [
+        "DATETIME"
     ]
 }
