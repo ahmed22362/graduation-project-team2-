@@ -3,11 +3,7 @@ const dbConfig = require("./../config/dbConfig")
 const query = require("./query")
 
 const db_config = {
-  // user: "postgres",
-  // host: "localhost",
-  // database: "pets_db",
-  // password: "22362",
-  // port: 5432,
+
   connectionString: dbConfig.RENDER_URL,
   connectionTimeoutMillie: 300000,
   idleTimeoutMillie: 300000,
