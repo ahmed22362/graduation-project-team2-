@@ -1,5 +1,6 @@
 var query = require("../db/query")
 var connection = require("../db/connection")
+const pool = require("./../db/pool")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 
@@ -29,12 +30,27 @@ exports.getUser = async (req, res) => {
 
 exports.addUser = async (req, res) => {
   try {
-    const { name, email, password, country, city, phone, image_url, role } =
-      req.body
+    const {
+      name,
+      email,
+      password,
+      password_confirm,
+      country,
+      city,
+      phone,
+      image_url,
+      role,
+    } = req.body
     if (!(email && password)) {
       return res
         .status(400)
         .json({ status: "fail", message: "please provide email or password" })
+    }
+    if (password !== password_confirm) {
+      return res.status(400).json({
+        status: "fail",
+        message: "password and password confirm not matched",
+      })
     }
     const encryptedUserPassword = await bcrypt.hash(password, 10)
     let values = [
@@ -46,12 +62,17 @@ exports.addUser = async (req, res) => {
       city,
       phone,
       image_url,
-      role,
     ]
     const result = await connection.dbQuery(
       query.queryList.SAVE_USER_QUERY,
       values
     )
+    if (role === "admin") {
+      await pool.query(query.queryList.UPDATE_USER_ROLE_QUERY, [
+        "admin",
+        result.rows[0].id,
+      ])
+    }
     res.status(201).json({ status: "successful", data: result.rows[0] })
   } catch (err) {
     console.log("Error : " + err)

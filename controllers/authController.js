@@ -1,10 +1,14 @@
-const jwt = require("jsonwebtoken")
 var query = require("../db/query")
 var connection = require("../db/connection")
-const bcrypt = require("bcrypt")
 const jwtConfig = require("./../config/jwtConfig")
 const validator = require("../utils/validator")
+const sendEmail = require("../utils/email")
+
+const jwt = require("jsonwebtoken")
 const { promisify } = require("util")
+const bcrypt = require("bcrypt")
+const moment = require("moment")
+const crypto = require("crypto")
 
 const signToken = (payload) => {
   return jwt.sign(payload, jwtConfig.JWT_SECRET, {
@@ -24,6 +28,7 @@ const createSentToken = (model, statusCode, res) => {
 exports.signUp = async (req, res) => {
   // Our register logic starts here
   try {
+    console.log(req.body)
     // Get user input
     const { email, password, password_confirm } = req.body
 
@@ -82,7 +87,9 @@ exports.login = async (req, res, next) => {
     const { email, password } = req.body
     // 1) Check if the email and password exits
     if (!email || !password) {
-      res.status(400).send("All input is required")
+      res
+        .status(400)
+        .json({ status: "fail", message: "email and password is required" })
     }
     if (!(await connection.isExistWhere(`"user"`, `email = '${email}'`))) {
       return res.status(409).send("please enter an exist email")
@@ -148,4 +155,123 @@ exports.restrictTo = (...roles) => {
     }
     next()
   }
+}
+
+exports.forgetPassword = async (req, res, next) => {
+  // Find user
+  if (!req.body.email) {
+    return res
+      .status(400)
+      .json({ status: "fail", message: "please input email" })
+  }
+  const model = await connection.dbQuery(
+    query.selectAllWhereQuery(`"user"`, `email = '${req.body.email}'`)
+  )
+  if (model.rows.length == 0) {
+    return res
+      .status(404)
+      .send({ error: `Failed to find user with this email` })
+  }
+  // Create reset token
+  const { code, hashed_code } = validator.createPasswordResetCode()
+
+  const date = new Date()
+  const new_date = moment(date)
+    .add(30, "m")
+    .toDate()
+    .toISOString()
+    .slice(0, 19)
+    .replace("T", " ")
+
+  const result = await connection.dbQuery(
+    query.queryList.UPDATE_USER_PASSWORD_RESET_CODE,
+    [hashed_code, new_date, model.rows[0].id]
+  )
+  // Send code to user Email
+  const message = `Forgot your password? Submit this code with your new password and passwordConfirm to validate.\
+  \nIf you didn't request to reset your password please ignore this message.\
+  \n Your code is ${code}`
+  try {
+    await sendEmail({
+      email: result.rows[0].email,
+      subject: "Your password reset Code <valid for 30 min>",
+      message,
+    })
+    return res.status(200).json({
+      status: "success",
+      message: `Code sent to mail! for test purpose the code is: ${code}`,
+    })
+  } catch (error) {
+    const result = await connection.dbQuery(
+      query.queryList.UPDATE_USER_PASSWORD_RESET_CODE,
+      [null, null, model.rows[0].id]
+    )
+    console.log(`${error} for record: ${result.rows[0]}`)
+    return res.status(404).send({
+      error: `Failed to send the mail for this user: ${error.message}`,
+    })
+  }
+}
+exports.resetPassword = async (req, res, next) => {
+  // Find the user based on token
+  const hashedCode = crypto
+    .createHash("sha256")
+    .update(req.body.code)
+    .digest("hex")
+  // Check password and token
+  const date = new Date()
+  const new_date = moment(date)
+    .toDate()
+    .toISOString()
+    .slice(0, 19)
+    .replace("T", " ")
+  const model = await connection.dbQuery(
+    query.selectAllWhereQuery(`"user"`, `password_reset_code = '${hashedCode}'`)
+  )
+  console.log(
+    query.selectAllWhereQuery(`"user"`, `password_reset_code = '${hashedCode}'`)
+  )
+  if (model.rows.length == 0) {
+    return res.status(400).send({ error: `invalid token or has expire` })
+  }
+  // Update changedPasswordAt property for the user
+  if (req.body.password !== req.body.password_confirm) {
+    return res.status(400).json({
+      status: "fail",
+      message: "password and password confirm must match!",
+    })
+  }
+  const encryptedUserPassword = await bcrypt.hash(req.body.password, 10)
+
+  connection
+    .dbQuery(query.queryList.UPDATE_USER_PASSWORD_RESET_CODE, [
+      null,
+      null,
+      model.rows[0].id,
+    ])
+    .then(async (result) => {
+      const model = await connection.dbQuery(
+        query.queryList.UPDATE_USER_PASSWORD_QUERY,
+        [encryptedUserPassword, encryptedUserPassword, result.rows[0].id]
+      )
+      // Update the user and log in via jwt
+      createSentToken(model.rows[0], 200, res)
+    })
+}
+
+exports.updateUserPassword = async (req, res, next) => {
+  // Get User
+  const model = await Model.findByPk(req.user.id)
+  // Check password and compare it
+  if (
+    !(await model.correctPassword(req.body.passwordCurrent, model.password))
+  ) {
+    return next(new AppError("Invalid current password", 401))
+  }
+  // Update the user data
+  model.password = req.body.password
+  model.passwordConfirm = req.body.passwordConfirm
+  await model.save()
+  // Log user in, send JWT
+  createSentToken(model, 200, res)
 }

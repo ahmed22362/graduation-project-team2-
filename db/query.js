@@ -20,12 +20,17 @@ exports.queryList = {
   UPDATE_CLINIC_QUERY:
     "UPDATE public.clinic SET  name=$1,phone=$2,country=$3,city=$4,rating=$5 WHERE id =$6 RETURNING *;",
   DELETE_CLINIC_QUERY: "DELETE FROM public.clinic WHERE id=$1;",
-
+  // user
   GET_USER_QUERY: `SELECT * FROM "user";`,
   SAVE_USER_QUERY:
-    'INSERT INTO "user"(name,email,password,password_confirm,country,city,phone,image_url,role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id,name,email,city,phone,password;',
+    'INSERT INTO "user"(name,email,password,password_confirm,country,city,phone,image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id,name,email,city,phone,password;',
   UPDATE_USER_QUERY:
     'UPDATE "user" SET  name=$1, phone=$2,image_url=$3,email=$4, country=$5, city=$6 WHERE id=$7 RETURNING name,phone;',
+  UPDATE_USER_PASSWORD_RESET_CODE: `UPDATE "user" SET  password_reset_code=$1, password_reset_expire=$2 WHERE id=$3 RETURNING * ;`,
+  UPDATE_USER_PASSWORD_QUERY: `UPDATE "user" SET  password=$1, password_confirm=$2 WHERE id=$3 RETURNING * ;`,
+  UPDATE_USER_ROLE_QUERY: `update "user" set role = $1 where id = $2 returning * ;`,
+  INSERT_ADMIN_QUERY:
+    'INSERT INTO "user"(name,email,password,password_confirm,country,city,phone,image_url,role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9) RETURNING *;',
 }
 exports.DDLQuery = {
   CREATE_pet_type: "CREATE TYPE pet_type AS ENUM ('dog', 'cat', 'other');",
@@ -42,14 +47,14 @@ exports.DDLQuery = {
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
   password VARCHAR(255) NOT NULL,
-  password_confirm VARCHAR(255) NOT NULL,
+  password_confirm VARCHAR(255) ,
   country VARCHAR(255) ,
   city VARCHAR(255) ,
   phone VARCHAR(255) ,
   image_url VARCHAR(255),
-  role role_type DEFAULT 'user'
+  role role_type DEFAULT 'user',
   password_reset_code VARCHAR(255),
-  password_reset_expire DATETIME
+  password_reset_expire timestamp without time zone
   );`,
   CREATE_PETS_TABLE: `CREATE TABLE IF NOT EXISTS pet (
   id SERIAL PRIMARY KEY,
