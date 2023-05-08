@@ -1,5 +1,4 @@
 const nodemailer = require("nodemailer")
-const mailConfig = require("./../config/mailConfig")
 
 const sendEmail = async (options) => {
   // Define the transporter
@@ -8,7 +7,7 @@ const sendEmail = async (options) => {
     port: 587,
     auth: {
       user: "newbook220@gmail.com",
-      pass: mailConfig.brevoSMTPkey,
+      pass: process.env.brevoSMTPkey,
     },
   })
   // 2) Define the email options
