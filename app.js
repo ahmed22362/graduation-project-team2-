@@ -10,15 +10,7 @@ var cors = require("cors")
 const app = express()
 
 app.use(cors())
-//
-// pool.connect((err, client, done) => {
-//   if (err) {
-//     console.error("Error connecting to database:", err.stack)
-//   } else {
-//     console.log("Connected to database")
-//     done()
-//   }
-// })
+
 app.use(body_parser.urlencoded({ extended: false }))
 app.use(body_parser.json())
 
