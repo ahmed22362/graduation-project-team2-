@@ -9,8 +9,7 @@ var userRouter = require("./routes/userRouter")
 var cors = require("cors")
 const app = express()
 
-app.use(cors())
-
+app.use(cros())
 app.use(body_parser.urlencoded({ extended: false }))
 app.use(body_parser.json())
 
