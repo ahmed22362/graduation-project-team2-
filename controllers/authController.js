@@ -28,6 +28,7 @@ const createSentToken = (model, statusCode, res) => {
 exports.signUp = async (req, res) => {
   // Our register logic starts here
   try {
+    console.log(req.body)
     // Get user input
     const { email, password, password_confirm } = req.body
 
