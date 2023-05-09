@@ -6,8 +6,6 @@ var petRoute = require("./routes/petRouter")
 var solidRoute = require("./routes/solidRouter")
 var clinicRoute = require("./routes/clinicRouter")
 var userRouter = require("./routes/userRouter")
-var cors = require("cors")
-const morgan = require("morgan")
 
 const app = express()
 app.use(morgan("dev"))
