@@ -1,28 +1,32 @@
 {
-    "sqltools.connections": [
-        {
-            "previewLimit": 50,
-            "server": "localhost",
-            "port": 5432,
-            "driver": "PostgreSQL",
-            "name": "graduation",
-            "database": "db",
-            "username": "postgres",
-            "password": "22362"
-        },
-        {
-            "previewLimit": 50,
-            "server": "localhost",
-            "port": 5432,
-            "driver": "PostgreSQL",
-            "name": "team2",
-            "database": "pets_db",
-            "username": "postgres",
-            "password": "22362"
-        }
-    ],
-    "cSpell.words": [
-        "brevo",
-        "DATETIME"
-    ]
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "graduation",
+      "database": "db",
+      "username": "postgres",
+      "password": "22362"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "team2",
+      "database": "pets_db",
+      "username": "postgres",
+      "password": "22362"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "driver": "PostgreSQL",
+      "name": "render_team2",
+      "connectString": "postgres://pet_db_s0l4_user:Zgp2UIvHfMjyTEEZ4iYvz24dWFSB5BDy@dpg-chb3rubhp8u01673dho0-a.oregon-postgres.render.com/pet_db_s0l4?ssl=true"
+    }
+  ],
+  "cSpell.words": ["brevo", "DATETIME"]
 }

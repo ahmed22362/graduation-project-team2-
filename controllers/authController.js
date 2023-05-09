@@ -28,13 +28,14 @@ const createSentToken = (model, statusCode, res) => {
 exports.signUp = async (req, res) => {
   // Our register logic starts here
   try {
-    console.log(req.body)
+    // console.log(req.body)
     // Get user input
-    const { email, password, password_confirm } = req.body
+    console.log(req.body)
+    const { name, email, password, password_confirm } = req.body
 
     // Validate user input
-    if (!(email || password)) {
-      res.status(400).send("All input is required")
+    if (!(email && password && name)) {
+      return res.status(400).send("All input is required")
     }
     const { valid, reason } = await validator.isEmailValid(email)
     // check if the email is really exist or not
@@ -60,7 +61,7 @@ exports.signUp = async (req, res) => {
     const encryptedUserPassword = await bcrypt.hash(password, 10)
 
     // Create user in our database
-    const { name, country, city, phone, image_url, role } = req.body
+    const { country, city, phone, image_url, role } = req.body
     let values = [
       name,
       email,
@@ -70,16 +71,18 @@ exports.signUp = async (req, res) => {
       city,
       phone,
       image_url,
-      role,
     ]
     connection
       .dbQuery(query.queryList.SAVE_USER_QUERY, values)
       .then((result) => {
+        // return new user
         createSentToken(result.rows[0], 200, res)
       })
-    // return new user
   } catch (err) {
-    res.status(400).send({ error: `Failed to signup user ${err.message}` })
+    console.log(err.message)
+    res
+      .status(400)
+      .json({ status: "fail", message: `Failed to signup user ${err.message}` })
   }
 }
 exports.login = async (req, res, next) => {

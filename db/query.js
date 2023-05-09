@@ -64,7 +64,8 @@ exports.DDLQuery = {
   city VARCHAR(255) ,
   description TEXT ,
   image_url VARCHAR(255) ,
-  Status status_type NOT NULL,
+  status status_type NOT NULL,
+  "like" INTEGER DEFAULT 0,
   user_id INTEGER REFERENCES "user"(id)
   );`,
   CREATE_SOLID_TABLE: `CREATE TABLE IF NOT EXISTS solid (
@@ -76,6 +77,7 @@ exports.DDLQuery = {
   city VARCHAR(255) ,
   description TEXT ,
   image_url VARCHAR(255) ,
+  "like" INTEGER DEFAULT 0,
   user_id INTEGER REFERENCES "user"(id)
 );
 `,
@@ -88,25 +90,29 @@ exports.DDLQuery = {
   rating INTEGER 
 );
 `,
-  CREATE_User_Pet_TABLE: `CREATE TABLE IF NOT EXISTS User_Pet (
+  CREATE_User_Pet_TABLE: `CREATE TABLE IF NOT EXISTS User_Pet_favorite (
   user_id INTEGER REFERENCES "user"(id),
   pet_id INTEGER REFERENCES pet(id),
   PRIMARY KEY (user_id, pet_id)
 );`,
-  CREATE_User_Solid_TABLE: `CREATE TABLE IF NOT EXISTS User_Solid (
+  CREATE_User_Solid_TABLE: `CREATE TABLE IF NOT EXISTS User_Solid_favorite (
   user_id INTEGER REFERENCES "user"(id),
   Solid_ID INTEGER REFERENCES Solid(id),
   PRIMARY KEY (user_id, Solid_ID)
 );
 `,
-  CREATE_POST_TABLE: `
-  CREATE TABLE posts (
+  CREATE_COMMENTS_TABLE: `CREATE TABLE IF NOT EXISTS comments (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES "user"(id),
   pet_id INTEGER REFERENCES pet(id),
-  likes INTEGER DEFAULT 0
-);
-`,
+  text TEXT
+);`,
+  CREATE_RATING_TABLE: `CREATE TABLE IF NOT EXISTS rating (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES "user"(id) NOT NULL,
+    clinic_id INTEGER REFERENCES clinic(id) NOT NULL,
+    score INTEGER NOT NULL
+  );`,
 }
 exports.selectAllQuery = (table) => `Select * from ${table}`
 exports.selectOneQuery = (table, id) =>
