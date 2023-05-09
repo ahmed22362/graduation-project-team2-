@@ -24,6 +24,9 @@ exports.getPet = async (req, res) => {
     res.status(500).send({ error: "Failed to get users" })
   }
 }
+
+exports.getHome = async (req, res) => {}
+
 exports.addPet = async (req, res) => {
   try {
     const {

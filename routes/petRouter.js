@@ -2,6 +2,7 @@ var express = require("express")
 const router = express.Router()
 var petController = require("../controllers/petController")
 
+router.get("/home", petController.getHome)
 router.route("/").get(petController.getPetList).post(petController.addPet)
 router
   .route("/:id")

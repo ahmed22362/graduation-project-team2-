@@ -42,3 +42,12 @@ exports.isAdminExistAndCreateIt = async () => {
     console.log("admin already exist")
   }
 }
+exports.checkConnection = async () => {
+  pool.connect((err, client, release) => {
+    if (err) {
+      return console.error("Error acquiring client", err.stack)
+    } else {
+      console.log("db Connected successfully!")
+    }
+  })
+}
