@@ -107,7 +107,7 @@ exports.deleteUser = async (req, res) => {
         .json({ status: "fail", message: "please provide valid id" })
     }
     await connection.dbQuery(query.deleteOneQuery(`"user"`, req.params.id))
-    res.status(201).send("Successfully solid deleted ")
+    res.status(201).send("Successfully user deleted ")
   } catch (err) {
     res.status(400).send({ error: `Failed to delete user ${err.message}` })
   }

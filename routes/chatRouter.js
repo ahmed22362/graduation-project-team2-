@@ -3,7 +3,6 @@ const router = express.Router()
 var chatController = require("../controllers/chatController")
 
 
-router
-    .post("/massege",chatController.sendMassege);
+router.post("/message",chatController.sendMessages);
 
 module.exports = router

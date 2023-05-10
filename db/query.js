@@ -107,6 +107,13 @@ exports.DDLQuery = {
   pet_id INTEGER REFERENCES pet(id),
   text TEXT
 );`,
+  CREATE_CHAT_TABLE:`CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  sender_id INTEGER REFERENCES "user"(id) NOT NULL,
+  receiver_id INTEGER REFERENCES "user"(id) NOT NULL,
+  message_text TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);`,
   CREATE_RATING_TABLE: `CREATE TABLE IF NOT EXISTS rating (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES "user"(id) NOT NULL,
@@ -128,10 +135,3 @@ exports.deleteWhereQuery = (table, where) =>
 // FROM "user" u
 // INNER JOIN messages m
 // ON u.id = m.sender_id;
-
-//relation massege
-//ALTER TABLE messages
-//   ADD CONSTRAINT fk_sender_id FOREIGN KEY (sender_id) REFERENCES "user"(id);
-//
-// ALTER TABLE messages
-//   ADD CONSTRAINT fk_receiver_id FOREIGN KEY (receiver_id) REFERENCES "user"(id);

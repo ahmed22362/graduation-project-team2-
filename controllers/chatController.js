@@ -1,7 +1,7 @@
 const connection = require("../db/connection");
 const pool=require("../db/pool");
 
-exports.sendMassege = async (req, res) => {
+exports.sendMessages = async (req, res) => {
     try {
         const {senderId, receiverId, messageText} = req.body;
         const createdAt = new Date();

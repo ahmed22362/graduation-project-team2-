@@ -33,9 +33,9 @@ app.use("/solid", solidRoute)
 app.use("/clinic", clinicRoute)
 app.use("/user", userRouter)
 
-app.use("/", (req, res) => {
-  res.status(200).json({ status: "success", msg: "home page" })
-})
+// app.use("/", (req, res) => {
+//   res.status(200).json({ status: "success", msg: "home page" })
+// })
 
 // app.listen(3222, async () => {
 //   // validator.checkConnection().then(await validator.isAdminExistAndCreateIt())
