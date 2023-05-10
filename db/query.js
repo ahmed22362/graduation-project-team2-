@@ -122,3 +122,16 @@ exports.selectAllWhereQuery = (table, where) =>
 exports.deleteOneQuery = (table, id) => `DELETE FROM ${table} WHERE id = ${id}`
 exports.deleteWhereQuery = (table, where) =>
   `DELETE FROM ${table} WHERE ${where}`
+
+//join chat
+//SELECT u.name, m.message_text, m.created_at
+// FROM "user" u
+// INNER JOIN messages m
+// ON u.id = m.sender_id;
+
+//relation massege
+//ALTER TABLE messages
+//   ADD CONSTRAINT fk_sender_id FOREIGN KEY (sender_id) REFERENCES "user"(id);
+//
+// ALTER TABLE messages
+//   ADD CONSTRAINT fk_receiver_id FOREIGN KEY (receiver_id) REFERENCES "user"(id);

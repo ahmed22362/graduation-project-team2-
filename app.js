@@ -42,6 +42,7 @@ app.use("/", (req, res) => {
 //   console.log(`server working on port ${3222}....`)
 // })
 
+//chat
 const server = app.listen(3222, async () => {
   await validator.isAdminExistAndCreateIt()
   console.log(`server working on port ${3222}....`)
