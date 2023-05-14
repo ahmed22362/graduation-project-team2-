@@ -61,7 +61,7 @@ exports.signUp = async (req, res) => {
     const encryptedUserPassword = await bcrypt.hash(password, 10)
 
     // Create user in our database
-    const { country, city, phone, image_url, role } = req.body
+    const { country, city, phone, image_url } = req.body
     let values = [
       name,
       email,
@@ -87,6 +87,7 @@ exports.signUp = async (req, res) => {
 }
 exports.login = async (req, res, next) => {
   try {
+    console.log(req.body)
     const { email, password } = req.body
     // 1) Check if the email and password exits
     if (!email || !password) {
@@ -264,17 +265,28 @@ exports.resetPassword = async (req, res, next) => {
 
 exports.updateUserPassword = async (req, res, next) => {
   // Get User
-  const model = await Model.findByPk(req.user.id)
+  const user = await connection.dbQuery(
+    query.selectOneQuery(`"user"`, req.user.id)
+  )
   // Check password and compare it
   if (
-    !(await model.correctPassword(req.body.passwordCurrent, model.password))
+    !(await validator.correctPassword(
+      req.body.currentPassword,
+      user.rows[0].password
+    ))
   ) {
-    return next(new AppError("Invalid current password", 401))
+    return res.status(400).json({
+      status: "fail",
+      message: "the password you entered is not correct!",
+    })
   }
   // Update the user data
-  model.password = req.body.password
-  model.passwordConfirm = req.body.passwordConfirm
-  await model.save()
+  const encryptedUserPassword = await bcrypt.hash(req.body.newPassword, 10)
+
+  const updateUser = await connection.dbQuery(
+    query.queryList.UPDATE_USER_PASSWORD_QUERY,
+    [encryptedUserPassword, null, user.rows[0].id]
+  )
   // Log user in, send JWT
-  createSentToken(model, 200, res)
+  createSentToken(updateUser.rows[0], 200, res)
 }

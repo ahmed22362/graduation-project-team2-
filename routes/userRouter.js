@@ -7,6 +7,13 @@ router.post("/signup", authController.signUp)
 router.post("/login", authController.login)
 router.post("/forgetPassword", authController.forgetPassword)
 router.post("/resetPassword", authController.resetPassword)
+router.patch(
+  "/updateMyPassword",
+  authController.protect,
+  authController.updateUserPassword
+)
+router.route("/pet-favorite")
+router.route("/solid-favorite")
 router
   .route("/")
   .get(userController.getUsers)
@@ -17,7 +24,6 @@ router
   .patch(userController.updateUser)
   .delete(userController.deleteUser)
   .get(userController.getUser)
-// router.post("/register",userController.signUp );
-// router.post("/signup", userController/.signUp)
+
 
 module.exports = router
