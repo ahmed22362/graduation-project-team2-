@@ -13,6 +13,7 @@ const { storage } = require("./utils/cloudinary")
 const upload = multer({ storage: storage("photos/public") })
 
 const app = express()
+
 app.use(morgan("dev"))
 
 app.use((req, res, next) => {
@@ -44,9 +45,9 @@ app.use("/upload-image", upload.single("image"), (req, res, next) => {
     .json({ status: "fail", message: "something went wrong while uploading!" })
 })
 
-// app.use("/", (req, res) => {
-//   res.status(200).json({ status: "success", msg: "home page" })
-// })
+app.use("/home", (req, res) => {
+  res.redirect("/user/home")
+})
 app.listen(3222, async () => {
   // validator.checkConnection().then(await validator.isAdminExistAndCreateIt())
   console.log(`server working on port ${3222}....`)

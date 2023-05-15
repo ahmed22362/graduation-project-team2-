@@ -1,5 +1,6 @@
 var query = require("../db/query")
 var connection = require("../db/connection")
+const validator = require("./../utils/validator")
 const pool = require("./../db/pool")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
@@ -14,13 +15,13 @@ exports.getUsers = async (req, res) => {
 }
 exports.getUser = async (req, res) => {
   try {
-    if (!(await connection.isExist(`"user"`, req.params.id))) {
+    if (!(await connection.isExist(`"user"`, req.params.userId))) {
       return res
         .status(404)
         .json({ status: "fail", message: "please provide valid id" })
     }
     const result = await connection.dbQuery(
-      query.selectOneQuery(`"user"`, req.params.id)
+      query.selectOneQuery(`"user"`, req.params.userId)
     )
     res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
@@ -30,50 +31,40 @@ exports.getUser = async (req, res) => {
 
 exports.addUser = async (req, res) => {
   try {
-    const {
-      name,
-      email,
-      password,
-      password_confirm,
-      country,
-      city,
-      phone,
-      image_url,
-      role,
-    } = req.body
-    if (!(email && password)) {
-      return res
-        .status(400)
-        .json({ status: "fail", message: "please provide email or password" })
+    const adjustBody = req.body
+    // Validate user input
+    if (!(adjustBody.email && adjustBody.password && adjustBody.name)) {
+      return res.status(400).send("All input is required")
     }
-    if (password !== password_confirm) {
+    if (adjustBody.password !== adjustBody.password_confirm) {
       return res.status(400).json({
         status: "fail",
         message: "password and password confirm not matched",
       })
     }
-    const encryptedUserPassword = await bcrypt.hash(password, 10)
-    let values = [
-      name,
-      email,
-      encryptedUserPassword,
-      encryptedUserPassword,
-      country,
-      city,
-      phone,
-      image_url,
-    ]
-    const result = await connection.dbQuery(
-      query.queryList.SAVE_USER_QUERY,
-      values
-    )
-    if (role === "admin") {
-      await pool.query(query.queryList.UPDATE_USER_ROLE_QUERY, [
-        "admin",
-        result.rows[0].id,
-      ])
+    // check if user already exist
+    // Validate if user exist in our database
+    if (
+      await connection.isExistWhere(`"user"`, `email = '${adjustBody.email}'`)
+    ) {
+      return res.status(409).send("email Already Exist. Please Login")
     }
-    res.status(201).json({ status: "successful", data: result.rows[0] })
+    //Encrypt user password
+    const encryptedUserPassword = await bcrypt.hash(adjustBody.password, 10)
+
+    adjustBody.password = encryptedUserPassword
+    delete adjustBody.password_confirm
+
+    const adjustColumns = Object.keys(adjustBody).join(", ")
+    const adjustValues = Object.values(adjustBody)
+      .map((value) => `'${value}'`)
+      .join(", ")
+
+    // Create user in our database
+    const q = query.insertQuery("user", adjustColumns, adjustValues)
+    connection.dbQuery(q).then((result) => {
+      res.status(201).json({ status: "successful", data: result.rows[0] })
+    })
   } catch (err) {
     console.log("Error : " + err)
     res.status(500).send({ error: "Failed to add user" })
@@ -82,17 +73,14 @@ exports.addUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
-    const { name, email, country, city, phone, image_url } = req.body
-    let values = [name, email, country, city, phone, image_url, req.params.id]
-    if (!(await connection.isExist(`"user"`, req.params.id))) {
+    const userId = req.params.userId
+    if (!(await connection.isExist(`"user"`, req.params.userId))) {
       return res
         .status(404)
         .json({ status: "fail", message: "please provide valid id" })
     }
-    const result = await connection.dbQuery(
-      query.queryList.UPDATE_USER_QUERY,
-      values
-    )
+    const updateQuery = query.updateOneWhereId("user", req.body, userId)
+    const result = await connection.dbQuery(updateQuery)
     res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
     res.status(500).send({ error: `Failed to update user ${err.message}` })
@@ -101,12 +89,12 @@ exports.updateUser = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
   try {
-    if (!(await connection.isExist(`"user"`, req.params.id))) {
+    if (!(await connection.isExist(`"user"`, req.params.userId))) {
       return res
         .status(404)
         .json({ status: "fail", message: "please provide valid id" })
     }
-    await connection.dbQuery(query.deleteOneQuery(`"user"`, req.params.id))
+    await connection.dbQuery(query.deleteOneQuery(`"user"`, req.params.userId))
     res.status(201).send("Successfully solid deleted ")
   } catch (err) {
     res.status(400).send({ error: `Failed to delete user ${err.message}` })
@@ -119,5 +107,33 @@ exports.deleteAll = async (req, res) => {
     res.status(201).send("Successfully user deleted ")
   } catch (err) {
     res.status(400).send({ error: `Failed to delete user ${err.message}` })
+  }
+}
+exports.getHome = async (req, res, next) => {
+  try {
+    const petData = await connection.dbQuery(query.queryList.getPetJoinUser)
+    const solidData = await connection.dbQuery(query.queryList.getSolidJoinUser)
+    const data = petData.rows.concat(solidData.rows)
+
+    res.status(200).json({ status: "success", length: data.length, data: data })
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: `some thing wend wrong: ${error.message}`,
+    })
+  }
+}
+
+exports.getUserPets = async (req, res, next) => {
+  try {
+    const id = req.user.id
+    const q = query.selectAllWhereQuery(`pet`, `user_id = ${id}`)
+    const pets = await connection.dbQuery(q)
+    res.status(200).json({ status: "success", data: pets.rows })
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: `some thing wend wrong: ${error.message}`,
+    })
   }
 }

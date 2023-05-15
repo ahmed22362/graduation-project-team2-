@@ -51,3 +51,7 @@ exports.checkConnection = async () => {
     }
   })
 }
+exports.getRandomArray = (arr) => {
+  const copy = arr.slice()
+  return (shuffled = copy.sort(() => Math.random() - 0.5))
+}

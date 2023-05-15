@@ -1,5 +1,5 @@
 var express = require("express")
-const router = express.Router()
+const router = express.Router({ mergeParams: true })
 var solidController = require("../controllers/solidController")
 
 router
@@ -7,7 +7,7 @@ router
   .get(solidController.getSolidList)
   .post(solidController.addSolid)
 router
-  .route("/:id")
+  .route("/:solidId")
   .patch(solidController.updateSolid)
   .delete(solidController.deleteSolid)
   .get(solidController.getSolid)
