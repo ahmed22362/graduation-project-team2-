@@ -122,3 +122,7 @@ exports.selectAllWhereQuery = (table, where) =>
 exports.deleteOneQuery = (table, id) => `DELETE FROM ${table} WHERE id = ${id}`
 exports.deleteWhereQuery = (table, where) =>
   `DELETE FROM ${table} WHERE ${where}`
+exports.updateOneWhereId = (table,updatedObj, id) =>
+  `UPDATE ${table} SET ${Object.entries(updatedObj)
+    .map(([key, value]) => `${key}='${value}'`)
+    .join(", ")} WHERE id=${id} returning * ;`

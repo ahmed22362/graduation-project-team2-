@@ -1,5 +1,4 @@
 const nodemailer = require("nodemailer")
-const mailConfig = require("./../config/mailConfig")
 
 const sendEmail = async (options) => {
   // Define the transporter
@@ -7,8 +6,8 @@ const sendEmail = async (options) => {
     host: "smtp-relay.sendinblue.com",
     port: 587,
     auth: {
-      user: "ahmedhamada496@gmail.com",
-      pass: mailConfig.brevoSMTPkey,
+      user: "newbook220@gmail.com",
+      pass: process.env.brevoSMTPkey,
     },
   })
   // 2) Define the email options

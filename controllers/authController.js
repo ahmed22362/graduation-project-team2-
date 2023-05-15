@@ -263,6 +263,7 @@ exports.resetPassword = async (req, res, next) => {
     })
 }
 
+// not done yet! do it if you want
 exports.updateUserPassword = async (req, res, next) => {
   // Get User
   const user = await connection.dbQuery(
