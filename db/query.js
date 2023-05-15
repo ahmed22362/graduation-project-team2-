@@ -31,6 +31,10 @@ exports.queryList = {
   UPDATE_USER_ROLE_QUERY: `update "user" set role = $1 where id = $2 returning * ;`,
   INSERT_ADMIN_QUERY:
     'INSERT INTO "user"(name,email,password,password_confirm,country,city,phone,image_url,role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9) RETURNING *;',
+  //comments
+  SAVE_COMMENT_QUERY:'INSERT INTO comments (text,pet_id,user_id) VALUES ($1,$2,$3)',
+  UPDATE_COMMENT_QUERY:'UPDATE comments SET text=$1 WHERE id=$2',
+
 }
 exports.DDLQuery = {
   CREATE_pet_type: "CREATE TYPE pet_type AS ENUM ('dog', 'cat', 'other');",
