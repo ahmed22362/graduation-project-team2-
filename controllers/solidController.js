@@ -11,13 +11,13 @@ exports.getSolidList = async (req, res) => {
 }
 exports.getSolid = async (req, res) => {
   try {
-    if (!(await connection.isExist("solid", req.params.id))) {
+    if (!(await connection.isExist("solid", req.params.solidId))) {
       return res
         .status(404)
         .json({ status: "fail", message: "please provide valid id" })
     }
     const result = await connection.dbQuery(
-      query.selectOneQuery("solid", req.params.id)
+      query.selectOneQuery("solid", req.params.solidId)
     )
     res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
@@ -27,31 +27,18 @@ exports.getSolid = async (req, res) => {
 
 exports.addSolid = async (req, res) => {
   try {
-    const {
-      name,
-      type,
-      price,
-      country,
-      city,
-      description,
-      image_url,
-      user_id,
-    } = req.body
+    if (req.file) {
+      req.body.image_url = req.file.path
+    }
+    const columns = Object.keys(req.body).join(", ")
+    const values = Object.values(req.body)
+      .map((value) => `'${value}'`)
+      .join(", ")
 
-    let values = [
-      name,
-      type,
-      price,
-      country,
-      city,
-      description,
-      image_url,
-      user_id,
-    ]
     const result = await connection.dbQuery(
-      query.queryList.SAVE_SOLID_QUERY,
-      values
+      query.insertQuery("solid", columns, values)
     )
+
     res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
     res.status(500).send({ error: `Failed to add solid ${err.message}` })
@@ -60,37 +47,14 @@ exports.addSolid = async (req, res) => {
 
 exports.updateSolid = async (req, res) => {
   try {
-    const {
-      name,
-      type,
-      price,
-      country,
-      city,
-      description,
-      image_url,
-      user_id,
-    } = req.body
-
-    let values = [
-      name,
-      type,
-      price,
-      country,
-      city,
-      description,
-      image_url,
-      user_id,
-      req.params.id,
-    ]
-    if (!(await connection.isExist("solid", req.params.id))) {
+    const solidId = req.params.solidId
+    if (!(await connection.isExist("solid", req.params.solidId))) {
       return res
         .status(404)
         .json({ status: "fail", message: "please provide valid id" })
     }
-    const result = await connection.dbQuery(
-      query.queryList.UPDATE_SOLID_QUERY,
-      values
-    )
+    const updateQuery = query.updateOneWhereId("solid", req.body, solidId)
+    const result = await connection.dbQuery(updateQuery)
     res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
     res.status(400).send({ error: `Failed to update solid ${err.message}` })
@@ -98,12 +62,12 @@ exports.updateSolid = async (req, res) => {
 }
 exports.deleteSolid = async (req, res) => {
   try {
-    if (!(await connection.isExist("solid", req.params.id))) {
+    if (!(await connection.isExist("solid", req.params.solidId))) {
       return res
         .status(404)
         .json({ status: "fail", message: "please provide valid id" })
     }
-    await connection.dbQuery(query.deleteOneQuery("solid", req.params.id))
+    await connection.dbQuery(query.deleteOneQuery("solid", req.params.solidId))
     res.status(201).send("Successfully solid deleted ")
   } catch (err) {
     res.status(400).send({ error: `Failed to delete solid ${err.message}` })

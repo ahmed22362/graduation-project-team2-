@@ -7,7 +7,7 @@ router
   .get(clinicController.getClinicList)
   .post(clinicController.addClinic)
 router
-  .route("/:id")
+  .route("/:clinicId")
   .patch(clinicController.updateClinic)
   .delete(clinicController.deleteClinic)
   .get(clinicController.getClinic)

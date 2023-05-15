@@ -28,16 +28,17 @@ const createSentToken = (model, statusCode, res) => {
 exports.signUp = async (req, res) => {
   // Our register logic starts here
   try {
-    // console.log(req.body)
     // Get user input
     console.log(req.body)
-    const { name, email, password, password_confirm } = req.body
+    const adjustBody = req.body
+
+    if (adjustBody.role) delete adjustBody.role
 
     // Validate user input
-    if (!(email && password && name)) {
+    if (!(adjustBody.email && adjustBody.password && adjustBody.name)) {
       return res.status(400).send("All input is required")
     }
-    const { valid, reason } = await validator.isEmailValid(email)
+    const { valid, reason } = await validator.isEmailValid(adjustBody.email)
     // check if the email is really exist or not
     // if (!valid) {
     //   return res.status(400).json({
@@ -46,7 +47,7 @@ exports.signUp = async (req, res) => {
     //   })
     // }
 
-    if (password !== password_confirm) {
+    if (adjustBody.password !== adjustBody.password_confirm) {
       return res.status(400).json({
         status: "fail",
         message: "password and password confirm not matched",
@@ -54,30 +55,30 @@ exports.signUp = async (req, res) => {
     }
     // check if user already exist
     // Validate if user exist in our database
-    if (await connection.isExistWhere(`"user"`, `email = '${email}'`)) {
-      return res.status(409).send("email Already Exist.")
+
+    if (
+      await connection.isExistWhere(`user`, `email = '${adjustBody.email}'`)
+    ) {
+      return res.status(409).send("email Already Exist. Please Login")
     }
     //Encrypt user password
-    const encryptedUserPassword = await bcrypt.hash(password, 10)
+    const encryptedUserPassword = await bcrypt.hash(adjustBody.password, 10)
+
+    adjustBody.password = encryptedUserPassword
+    delete adjustBody.password_confirm
+
+    const adjustColumns = Object.keys(adjustBody).join(", ")
+    const adjustValues = Object.values(adjustBody)
+      .map((value) => `'${value}'`)
+      .join(", ")
 
     // Create user in our database
-    const { country, city, phone, image_url } = req.body
-    let values = [
-      name,
-      email,
-      encryptedUserPassword,
-      encryptedUserPassword,
-      country,
-      city,
-      phone,
-      image_url,
-    ]
-    connection
-      .dbQuery(query.queryList.SAVE_USER_QUERY, values)
-      .then((result) => {
-        // return new user
-        createSentToken(result.rows[0], 200, res)
-      })
+    const q = query.insertQuery(user, adjustColumns, adjustValues)
+    console.log(q)
+    connection.dbQuery(q).then((result) => {
+      // return new user
+      createSentToken(result.rows[0], 200, res)
+    })
   } catch (err) {
     console.log(err.message)
     res
@@ -95,15 +96,15 @@ exports.login = async (req, res, next) => {
         .status(400)
         .json({ status: "fail", message: "email and password is required" })
     }
-    if (!(await connection.isExistWhere(`"user"`, `email = '${email}'`))) {
+    if (!(await connection.isExistWhere(`user`, `email = '${email}'`))) {
       return res.status(409).send("please enter an exist email")
     }
     const user = await connection.dbQuery(
-      query.selectAllWhereQuery(`"user"`, `email = '${email}'`)
+      query.selectAllWhereQuery(`user`, `email = '${email}'`)
     )
     if (await validator.correctPassword(password, user.rows[0].password)) {
       connection
-        .dbQuery(query.selectAllWhereQuery(`"user"`, `email = '${email}'`))
+        .dbQuery(query.selectAllWhereQuery(`user`, `email = '${email}'`))
         .then((result) => {
           // return new user
           createSentToken(result.rows[0], 200, res)
@@ -127,9 +128,10 @@ exports.protect = async (req, res, next) => {
     token = req.headers.authorization.split(" ")[1]
   }
   if (!token) {
-    return res
-      .status(400)
-      .json({ status: "fail", message: `please provide the token!` })
+    return res.status(400).json({
+      status: "fail",
+      message: `you are not logged in!, please login and continue`,
+    })
   }
   let decoded = ""
   // 2) Verification token
@@ -142,7 +144,7 @@ exports.protect = async (req, res, next) => {
   }
   // 3) Check if the user still exist
   const result = await connection.dbQuery(
-    query.selectOneQuery(`"user"`, decoded.id)
+    query.selectOneQuery(`user`, decoded.id)
   )
   if (result.rows.length == 0) {
     return res
@@ -169,7 +171,7 @@ exports.forgetPassword = async (req, res, next) => {
       .json({ status: "fail", message: "please input email" })
   }
   const model = await connection.dbQuery(
-    query.selectAllWhereQuery(`"user"`, `email = '${req.body.email}'`)
+    query.selectAllWhereQuery(`user`, `email = '${req.body.email}'`)
   )
   if (model.rows.length == 0) {
     return res
@@ -230,10 +232,10 @@ exports.resetPassword = async (req, res, next) => {
     .slice(0, 19)
     .replace("T", " ")
   const model = await connection.dbQuery(
-    query.selectAllWhereQuery(`"user"`, `password_reset_code = '${hashedCode}'`)
+    query.selectAllWhereQuery(`user`, `password_reset_code = '${hashedCode}'`)
   )
   console.log(
-    query.selectAllWhereQuery(`"user"`, `password_reset_code = '${hashedCode}'`)
+    query.selectAllWhereQuery(`user`, `password_reset_code = '${hashedCode}'`)
   )
   if (model.rows.length == 0) {
     return res.status(400).send({ error: `invalid token or has expire` })
@@ -267,7 +269,7 @@ exports.resetPassword = async (req, res, next) => {
 exports.updateUserPassword = async (req, res, next) => {
   // Get User
   const user = await connection.dbQuery(
-    query.selectOneQuery(`"user"`, req.user.id)
+    query.selectOneQuery(`user`, req.user.id)
   )
   // Check password and compare it
   if (

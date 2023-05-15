@@ -31,10 +31,24 @@ exports.queryList = {
   UPDATE_USER_ROLE_QUERY: `update "user" set role = $1 where id = $2 returning * ;`,
   INSERT_ADMIN_QUERY:
     'INSERT INTO "user"(name,email,password,password_confirm,country,city,phone,image_url,role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9) RETURNING *;',
+  getPetJoinUser: `SELECT p.*,
+    u.name as user_name,
+    u.image_url as user_image,
+    'pet' as table_name
+    from "pet" as p
+    JOIN "user" as u ON p.user_id = u.id
+    ORDER BY random();`,
+  getSolidJoinUser: `SELECT s.*,
+    u.name as user_name,
+    u.image_url as user_image,
+    'solid' as table_name
+    from "solid" as s
+    JOIN "user" as u ON s.user_id = u.id
+    ORDER BY random();`,
+
   //comments
   SAVE_COMMENT_QUERY:'INSERT INTO comments (text,pet_id,user_id) VALUES ($1,$2,$3)',
   UPDATE_COMMENT_QUERY:'UPDATE comments SET text=$1 WHERE id=$2',
-
 }
 exports.DDLQuery = {
   CREATE_pet_type: "CREATE TYPE pet_type AS ENUM ('dog', 'cat', 'other');",
@@ -111,7 +125,7 @@ exports.DDLQuery = {
   pet_id INTEGER REFERENCES pet(id),
   text TEXT
 );`,
-  CREATE_CHAT_TABLE:`CREATE TABLE messages (
+  CREATE_CHAT_TABLE: `CREATE TABLE messages (
   id SERIAL PRIMARY KEY,
   sender_id INTEGER REFERENCES "user"(id) NOT NULL,
   receiver_id INTEGER REFERENCES "user"(id) NOT NULL,
@@ -125,18 +139,20 @@ exports.DDLQuery = {
     score INTEGER NOT NULL
   );`,
 }
-exports.selectAllQuery = (table) => `Select * from ${table}`
-exports.selectOneQuery = (table, id) =>
-  `Select * FROM ${table} WHERE id = ${id}`
-exports.selectAllWhereQuery = (table, where) =>
-  `Select * from ${table} where ${where}`
-exports.deleteOneQuery = (table, id) => `DELETE FROM ${table} WHERE id = ${id}`
-exports.deleteWhereQuery = (table, where) =>
-  `DELETE FROM ${table} WHERE ${where}`
+exports.selectAllQuery = (table) => `Select * from "${table}"`
 
-exports.updateOneWhereId = (table,updatedObj, id) =>
-  `UPDATE ${table} SET ${Object.entries(updatedObj)
+exports.selectOneQuery = (table, id) =>
+  `Select * FROM "${table}" WHERE id = ${id}`
+
+exports.selectAllWhereQuery = (table, where) =>
+  `Select * from "${table}" where ${where}`
+exports.deleteOneQuery = (table, id) =>
+  `DELETE FROM "${table}" WHERE id = ${id}`
+
+exports.deleteWhereQuery = (table, where) =>
+  `DELETE FROM "${table}" WHERE ${where}`
+
+exports.updateOneWhereId = (table, updatedObj, id) =>
+  `UPDATE "${table}" SET ${Object.entries(updatedObj)
     .map(([key, value]) => `${key}='${value}'`)
     .join(", ")} WHERE id=${id} returning * ;`
-
-

@@ -1,8 +1,9 @@
-var express = require("express")
-const router = express.Router()
+const express = require("express")
 var userController = require("../controllers/userController")
 const authController = require("./../controllers/authController")
 const connection = require("../db/connection")
+const petRouter = require("./petRouter")
+const router = express.Router({ mergeParams: true })
 
 router.post("/signup", authController.signUp)
 router.post("/login", authController.login)
@@ -13,15 +14,17 @@ router.patch(
   authController.protect,
   authController.updateUserPassword
 )
-router.route("/pet-favorite")
-router.route("/solid-favorite")
+// router.route("/pet-favorite")
+// router.route("/solid-favorite")
+router.get("/home", userController.getHome)
+router.get("/pet", authController.protect, userController.getUserPets)
 router
   .route("/")
   .get(userController.getUsers)
   .post(userController.addUser)
   .delete(userController.deleteAll)
 router
-  .route("/:id")
+  .route("/:userId")
   .patch(userController.updateUser)
   .delete(userController.deleteUser)
   .get(userController.getUser)

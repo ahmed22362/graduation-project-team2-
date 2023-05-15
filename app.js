@@ -2,7 +2,7 @@ const express = require("express")
 var body_parser = require("body-parser")
 const validator = require("./utils/validator")
 const pool = require("./db/pool")
-const morgan=require("morgan")
+const morgan = require("morgan")
 const multer = require("multer")
 var petRoute = require("./routes/petRouter")
 var solidRoute = require("./routes/solidRouter")
@@ -11,9 +11,8 @@ var userRouter = require("./routes/userRouter")
 var commentsRouter = require("./routes/commentsRouter")
 const { storage } = require("./utils/cloudinary")
 
-
-const  chatRouter = require("./routes/chatRouter")
-const socketIO = require('socket.io');
+const chatRouter = require("./routes/chatRouter")
+const socketIO = require("socket.io")
 
 const upload = multer({ storage: storage("photos/public") })
 const app = express()
@@ -51,29 +50,33 @@ app.use("/upload-image", upload.single("image"), (req, res, next) => {
     .json({ status: "fail", message: "something went wrong while uploading!" })
 })
 
+app.use("/home", (req, res) => {
+  res.redirect("/user/home")
+})
+
 //chat
 const server = app.listen(3222, async () => {
   await validator.isAdminExistAndCreateIt()
   console.log(`server working on port ${3222}....`)
 })
 
-const io = socketIO(server);
-io.on('connection', (socket) => {
-  console.log('Client connected');
+const io = socketIO(server)
+io.on("connection", (socket) => {
+  console.log("Client connected")
 
   // Handle incoming messages
-  socket.on('message', (data) => {
-    console.log(`Received message: ${data}`);
+  socket.on("message", (data) => {
+    console.log(`Received message: ${data}`)
     // Broadcast the message to all connected clients
-    socket.broadcast.emit('message', data);
-  });
+    socket.broadcast.emit("message", data)
+  })
 
   // Handle disconnection
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
-  });
-});
-app.use("/chat",chatRouter)
+  socket.on("disconnect", () => {
+    console.log("Client disconnected")
+  })
+})
+app.use("/chat", chatRouter)
 //
 // post('/messages', (req, res) => {
 //   const { senderId, receiverId, messageText } = req.body;

@@ -11,13 +11,13 @@ exports.getClinicList = async (req, res) => {
 }
 exports.getClinic = async (req, res) => {
   try {
-    if (!(await connection.isExist("clinic", req.params.id))) {
+    if (!(await connection.isExist("clinic", req.params.clinicId))) {
       return res
         .status(404)
         .json({ status: "fail", message: "please provide valid id" })
     }
     const result = await connection.dbQuery(
-      query.selectOneQuery(`clinic`, req.params.id)
+      query.selectOneQuery(`clinic`, req.params.clinicId)
     )
     res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
@@ -27,11 +27,15 @@ exports.getClinic = async (req, res) => {
 
 exports.addClinic = async (req, res) => {
   try {
-    const { name, phone, country, city, rating } = req.body
-    let values = [name, phone, country, city, rating]
+    if (req.file) {
+      req.body.image_url = req.file.path
+    }
+    const columns = Object.keys(req.body).join(", ")
+    const values = Object.values(req.body)
+      .map((value) => `'${value}'`)
+      .join(", ")
     const result = await connection.dbQuery(
-      query.queryList.SAVE_CLINIC_QUERY,
-      values
+      query.insertQuery("clinic", columns, values)
     )
     res.status(201).json({ status: "successful", data: result.rows })
   } catch (err) {
@@ -41,16 +45,17 @@ exports.addClinic = async (req, res) => {
 
 exports.updateClinic = async (req, res) => {
   try {
-    const { name, phone, country, city, rating } = req.body
-    let values = [name, phone, country, city, rating, req.params.id]
-    if (!(await connection.isExist("clinic", req.params.id))) {
+    if (req.file) {
+      req.body.image_url = req.file.path
+    }
+    const id = req.params.clinicId
+    if (!(await connection.isExist("clinic", req.params.clinicId))) {
       return res
         .status(404)
         .json({ status: "fail", message: "please provide valid id" })
     }
     const result = await connection.dbQuery(
-      query.queryList.UPDATE_CLINIC_QUERY,
-      values
+      query.updateOneWhereId("clinic", req.body, id)
     )
     res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
@@ -59,13 +64,13 @@ exports.updateClinic = async (req, res) => {
 }
 exports.deleteClinic = async (req, res) => {
   try {
-    if (!(await connection.isExist("clinic", req.params.id))) {
+    if (!(await connection.isExist("clinic", req.params.clinicId))) {
       return res
         .status(404)
         .json({ status: "fail", message: "please provide valid id" })
     }
     const result = await connection.dbQuery(
-      query.deleteOneQuery("clinic", req.params.id)
+      query.deleteOneQuery("clinic", req.params.clinicId)
     )
     res
       .status(200)

@@ -11,13 +11,13 @@ exports.getPetList = async (req, res) => {
 }
 exports.getPet = async (req, res) => {
   try {
-    if (!(await connection.isExist(`pet`, req.params.id))) {
+    if (!(await connection.isExist(`pet`, req.params.petId))) {
       return res
         .status(404)
         .json({ status: "fail", message: "please provide valid id" })
     }
     const result = await connection.dbQuery(
-      query.selectOneQuery(`"pet"`, req.params.id)
+      query.selectOneQuery(`"pet"`, req.params.petId)
     )
     res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
@@ -37,8 +37,9 @@ exports.addPet = async (req, res) => {
       .map((value) => `'${value}'`)
       .join(", ")
 
-    const insertQuery = `INSERT INTO pet (${columns}) VALUES (${values})`
-    const result = await connection.dbQuery(insertQuery)
+    const result = await connection.dbQuery(
+      query.insertQuery("pet", columns, values)
+    )
     res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
     res.status(500).send({ error: `Failed to save pet ${err.message}` })
@@ -50,7 +51,7 @@ exports.updatePet = async (req, res) => {
     if (req.file) {
       req.body.image_url = req.file.path
     }
-    const petId = req.params.id
+    const petId = req.params.petId
     const body = req.body
     // check if pet exist
     if (!(await connection.isExist(`pet`, petId))) {
@@ -69,12 +70,12 @@ exports.updatePet = async (req, res) => {
 }
 exports.deletePet = async (req, res) => {
   try {
-    if (!(await connection.isExist(`pet`, req.params.id))) {
+    if (!(await connection.isExist(`pet`, req.params.petId))) {
       return res
         .status(404)
         .json({ status: "fail", message: "please provide valid id" })
     }
-    await connection.dbQuery(query.deleteOneQuery("pet", req.params.id))
+    await connection.dbQuery(query.deleteOneQuery("pet", req.params.petId))
     res.status(201).send("Successfully pet deleted ")
   } catch (err) {
     res.status(500).send({ error: `Failed to delete pet ${err.message}` })
