@@ -130,8 +130,9 @@ exports.deleteOneQuery = (table, id) => `DELETE FROM ${table} WHERE id = ${id}`
 exports.deleteWhereQuery = (table, where) =>
   `DELETE FROM ${table} WHERE ${where}`
 
-//join chat
-//SELECT u.name, m.message_text, m.created_at
-// FROM "user" u
-// INNER JOIN messages m
-// ON u.id = m.sender_id;
+exports.updateOneWhereId = (table,updatedObj, id) =>
+  `UPDATE ${table} SET ${Object.entries(updatedObj)
+    .map(([key, value]) => `${key}='${value}'`)
+    .join(", ")} WHERE id=${id} returning * ;`
+
+

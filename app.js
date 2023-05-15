@@ -1,5 +1,6 @@
 const express = require("express")
 var body_parser = require("body-parser")
+const morgan = require("morgan")
 const validator = require("./utils/validator")
 const pool = require("./db/pool")
 const morgan=require("morgan")
@@ -7,9 +8,15 @@ var petRoute = require("./routes/petRouter")
 var solidRoute = require("./routes/solidRouter")
 var clinicRoute = require("./routes/clinicRouter")
 var userRouter = require("./routes/userRouter")
+const { storage } = require("./utils/cloudinary")
+
+
 const  chatRouter = require("./routes/chatRouter")
 const socketIO = require('socket.io');
+
+const upload = multer({ storage: storage("photos/public") })
 const app = express()
+
 app.use(morgan("dev"))
 
 app.use((req, res, next) => {
@@ -33,20 +40,21 @@ app.use("/solid", solidRoute)
 app.use("/clinic", clinicRoute)
 app.use("/user", userRouter)
 
-// app.use("/", (req, res) => {
-//   res.status(200).json({ status: "success", msg: "home page" })
-// })
-
-// app.listen(3222, async () => {
-//   // validator.checkConnection().then(await validator.isAdminExistAndCreateIt())
-//   console.log(`server working on port ${3222}....`)
-// })
+app.use("/upload-image", upload.single("image"), (req, res, next) => {
+  if (req.file) {
+    return res.status(200).json({ status: "success", image_url: req.file.path })
+  }
+  res
+    .status(400)
+    .json({ status: "fail", message: "something went wrong while uploading!" })
+})
 
 //chat
 const server = app.listen(3222, async () => {
   await validator.isAdminExistAndCreateIt()
   console.log(`server working on port ${3222}....`)
 })
+
 const io = socketIO(server);
 io.on('connection', (socket) => {
   console.log('Client connected');
