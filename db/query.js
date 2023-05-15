@@ -107,6 +107,13 @@ exports.DDLQuery = {
   pet_id INTEGER REFERENCES pet(id),
   text TEXT
 );`,
+  CREATE_CHAT_TABLE:`CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  sender_id INTEGER REFERENCES "user"(id) NOT NULL,
+  receiver_id INTEGER REFERENCES "user"(id) NOT NULL,
+  message_text TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);`,
   CREATE_RATING_TABLE: `CREATE TABLE IF NOT EXISTS rating (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES "user"(id) NOT NULL,
@@ -122,7 +129,10 @@ exports.selectAllWhereQuery = (table, where) =>
 exports.deleteOneQuery = (table, id) => `DELETE FROM ${table} WHERE id = ${id}`
 exports.deleteWhereQuery = (table, where) =>
   `DELETE FROM ${table} WHERE ${where}`
+
 exports.updateOneWhereId = (table,updatedObj, id) =>
   `UPDATE ${table} SET ${Object.entries(updatedObj)
     .map(([key, value]) => `${key}='${value}'`)
     .join(", ")} WHERE id=${id} returning * ;`
+
+
