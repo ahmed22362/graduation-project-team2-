@@ -121,6 +121,13 @@ exports.DDLQuery = {
   pet_id INTEGER REFERENCES pet(id),
   text TEXT
 );`,
+  CREATE_CHAT_TABLE: `CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  sender_id INTEGER REFERENCES "user"(id) NOT NULL,
+  receiver_id INTEGER REFERENCES "user"(id) NOT NULL,
+  message_text TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);`,
   CREATE_RATING_TABLE: `CREATE TABLE IF NOT EXISTS rating (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES "user"(id) NOT NULL,
@@ -145,6 +152,3 @@ exports.updateOneWhereId = (table, updatedObj, id) =>
   `UPDATE "${table}" SET ${Object.entries(updatedObj)
     .map(([key, value]) => `${key}='${value}'`)
     .join(", ")} WHERE id=${id} returning * ;`
-
-exports.insertQuery = (table, columns, values) =>
-  `INSERT INTO "${table}" (${columns}) VALUES (${values}) returning * ;`

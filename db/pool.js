@@ -45,6 +45,8 @@ const checkDb = (flag, typeFlag) => {
         client.query(query.DDLQuery.CREATE_User_Solid_TABLE)
         client.query(query.DDLQuery.CREATE_COMMENTS_TABLE)
         client.query(query.DDLQuery.CREATE_RATING_TABLE)
+        client.query(query.DDLQuery.CREATE_CHAT_TABLE)
+
         console.log("tables created successfully")
       }
     })

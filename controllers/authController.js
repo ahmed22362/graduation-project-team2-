@@ -55,6 +55,7 @@ exports.signUp = async (req, res) => {
     }
     // check if user already exist
     // Validate if user exist in our database
+
     if (
       await connection.isExistWhere(`user`, `email = '${adjustBody.email}'`)
     ) {
