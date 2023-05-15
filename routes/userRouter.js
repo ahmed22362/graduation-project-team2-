@@ -34,7 +34,7 @@ router
 router.get("/joinPet", async (req, res) => {
   try {
     await connection.dbQuery(
-      " SELECT * FROM pet JOIN 'user' ON pet.user_id = user.id"
+      ` SELECT * FROM pet JOIN "user" ON pet.user_id = "user".id`
     )
     res.status(201).send("Successfully user joined ")
   } catch (err) {
