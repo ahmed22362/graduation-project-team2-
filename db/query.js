@@ -49,6 +49,9 @@ exports.queryList = {
   //comments
   SAVE_COMMENT_QUERY:'INSERT INTO comments (text,pet_id,user_id) VALUES ($1,$2,$3)',
   UPDATE_COMMENT_QUERY:'UPDATE comments SET text=$1 WHERE id=$2',
+  //rating
+  SAVE_RATING_QUERY:'INSERT INTO rating (score,clinic_id,user_id ) VALUES ($1,$2,$3)',
+  UPDATE_RATING_QUERY:'UPDATE rating SET score=$1 WHERE id=$2',
 }
 exports.DDLQuery = {
   CREATE_pet_type: "CREATE TYPE pet_type AS ENUM ('dog', 'cat', 'other');",

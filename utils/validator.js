@@ -22,7 +22,7 @@ exports.createPasswordResetCode = function () {
 }
 exports.isAdminExistAndCreateIt = async () => {
   const result = await pool.query(
-    query.selectAllWhereQuery(`"user"`, `email = 'admin@gmail.com'`)
+    query.selectAllWhereQuery(`user`, `email = 'admin@gmail.com'`)
   )
   if (result.rows.length == 0) {
     const encryptedUserPassword = await bcrypt.hash("password", 10)

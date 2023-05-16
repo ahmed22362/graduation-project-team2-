@@ -8,6 +8,7 @@ var petRoute = require("./routes/petRouter")
 var solidRoute = require("./routes/solidRouter")
 var clinicRoute = require("./routes/clinicRouter")
 var userRouter = require("./routes/userRouter")
+var ratingRouter = require("./routes/ratingRouter")
 var commentsRouter = require("./routes/commentsRouter")
 const { storage } = require("./utils/cloudinary")
 
@@ -40,6 +41,7 @@ app.use("/solid", solidRoute)
 app.use("/clinic", clinicRoute)
 app.use("/user", userRouter)
 app.use("/comments",commentsRouter)
+app.use("/rating",ratingRouter)
 
 app.use("/upload-image", upload.single("image"), (req, res, next) => {
   if (req.file) {
