@@ -156,8 +156,10 @@ exports.protect = async (req, res, next) => {
 }
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      res.status(403).send({ error: `You are not authorized to access this` })
+    if (!roles.flat(Infinity).includes(req.user.role)) {
+      return res
+        .status(403)
+        .send({ error: `You are not authorized to access this` })
     }
     next()
   }

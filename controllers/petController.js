@@ -17,11 +17,13 @@ exports.getPet = async (req, res) => {
         .json({ status: "fail", message: "please provide valid id" })
     }
     const result = await connection.dbQuery(
-      query.selectOneQuery(`"pet"`, req.params.petId)
+      query.selectOneQuery(`pet`, req.params.petId)
     )
     res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
-    res.status(500).send({ error: "Failed to get users" })
+    res
+      .status(400)
+      .json({ status: "fail", message: `Failed to get pets:${err.message}` })
   }
 }
 
@@ -79,5 +81,27 @@ exports.deletePet = async (req, res) => {
     res.status(201).send("Successfully pet deleted ")
   } catch (err) {
     res.status(500).send({ error: `Failed to delete pet ${err.message}` })
+  }
+}
+
+exports.addLike = async (req, res) => {
+  req.body.user_id = req.user.id
+  try {
+    const pet = await connection.dbQuery(
+      `update pet set "like" = "like" + 1 where id = '${req.body.pet_id}' returning *`
+    )
+    const like = pet.rows[0]
+    const q = query.insertQuery(
+      "user_pet_favorite",
+      "user_id , pet_id",
+      `${req.user.id}, ${req.body.pet_id}`
+    )
+    await connection.dbQuery(q)
+    res.status(200).json({ status: "success", data: like })
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: `can't like the same post twice: ${error.message}`,
+    })
   }
 }

@@ -1,9 +1,7 @@
 var query = require("../db/query")
 var connection = require("../db/connection")
 const validator = require("./../utils/validator")
-const pool = require("./../db/pool")
 const bcrypt = require("bcrypt")
-const jwt = require("jsonwebtoken")
 
 exports.getUsers = async (req, res) => {
   try {
@@ -15,13 +13,13 @@ exports.getUsers = async (req, res) => {
 }
 exports.getUser = async (req, res) => {
   try {
-    if (!(await connection.isExist(`"user"`, req.params.userId))) {
+    if (!(await connection.isExist("user", req.params.userId))) {
       return res
         .status(404)
         .json({ status: "fail", message: "please provide valid id" })
     }
     const result = await connection.dbQuery(
-      query.selectOneQuery(`"user"`, req.params.userId)
+      query.selectOneQuery(`user`, req.params.userId)
     )
     res.status(200).json({ status: "successful", data: result.rows })
   } catch (err) {
@@ -45,7 +43,7 @@ exports.addUser = async (req, res) => {
     // check if user already exist
     // Validate if user exist in our database
     if (
-      await connection.isExistWhere(`"user"`, `email = '${adjustBody.email}'`)
+      await connection.isExistWhere("user", `email = '${adjustBody.email}'`)
     ) {
       return res.status(409).send("email Already Exist. Please Login")
     }
@@ -74,7 +72,7 @@ exports.addUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const userId = req.params.userId
-    if (!(await connection.isExist(`"user"`, req.params.userId))) {
+    if (!(await connection.isExist("user", req.params.userId))) {
       return res
         .status(404)
         .json({ status: "fail", message: "please provide valid id" })
@@ -89,12 +87,12 @@ exports.updateUser = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
   try {
-    if (!(await connection.isExist(`"user"`, req.params.userId))) {
+    if (!(await connection.isExist("user", req.params.userId))) {
       return res
         .status(404)
         .json({ status: "fail", message: "please provide valid id" })
     }
-    await connection.dbQuery(query.deleteOneQuery(`"user"`, req.params.userId))
+    await connection.dbQuery(query.deleteOneQuery("user", req.params.userId))
     res.status(201).send("Successfully user deleted ")
   } catch (err) {
     res.status(400).send({ error: `Failed to delete user ${err.message}` })

@@ -46,9 +46,10 @@ exports.queryList = {
     JOIN "user" as u ON s.user_id = u.id
     ORDER BY random();`,
 
-  //comments
-  SAVE_COMMENT_QUERY:'INSERT INTO comments (text,pet_id,user_id) VALUES ($1,$2,$3)',
-  UPDATE_COMMENT_QUERY:'UPDATE comments SET text=$1 WHERE id=$2',
+  //comment
+  SAVE_COMMENT_QUERY:
+    "INSERT INTO comment (text,pet_id,user_id) VALUES ($1,$2,$3) returning * ;",
+  UPDATE_COMMENT_QUERY: "UPDATE comment SET text=$1 WHERE id=$2 returning * ;",
 }
 exports.DDLQuery = {
   CREATE_pet_type: "CREATE TYPE pet_type AS ENUM ('dog', 'cat', 'other');",
@@ -119,18 +120,19 @@ exports.DDLQuery = {
   PRIMARY KEY (user_id, Solid_ID)
 );
 `,
-  CREATE_COMMENTS_TABLE: `CREATE TABLE IF NOT EXISTS comments (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES "user"(id),
-  pet_id INTEGER REFERENCES pet(id),
-  text TEXT
-);`,
+  CREATE_COMMENTS_TABLE: `CREATE TABLE IF NOT EXISTS comment (
+    id SERIAL PRIMARY KEY,
+    text TEXT NOT NULL ,
+    create_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    user_id INTEGER REFERENCES "user"(id) NOT NULL,
+    pet_id INTEGER REFERENCES pet(id) NOT NULL
+  );`,
   CREATE_CHAT_TABLE: `CREATE TABLE messages (
   id SERIAL PRIMARY KEY,
   sender_id INTEGER REFERENCES "user"(id) NOT NULL,
   receiver_id INTEGER REFERENCES "user"(id) NOT NULL,
   message_text TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMP DEFAULT NOW()
 );`,
   CREATE_RATING_TABLE: `CREATE TABLE IF NOT EXISTS rating (
     id SERIAL PRIMARY KEY,
@@ -151,6 +153,9 @@ exports.deleteOneQuery = (table, id) =>
 
 exports.deleteWhereQuery = (table, where) =>
   `DELETE FROM "${table}" WHERE ${where}`
+
+exports.insertQuery = (table, fields, values) =>
+  `INSERT INTO "${table}" (${fields}) VALUES (${values}) returning * ;`
 
 exports.updateOneWhereId = (table, updatedObj, id) =>
   `UPDATE "${table}" SET ${Object.entries(updatedObj)
