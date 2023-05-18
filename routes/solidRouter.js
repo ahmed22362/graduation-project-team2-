@@ -1,7 +1,9 @@
 var express = require("express")
 const router = express.Router({ mergeParams: true })
 var solidController = require("../controllers/solidController")
+const authController = require("./../controllers/authController")
 
+router.post("/like", authController.protect, solidController.addLike)
 router
   .route("/")
   .get(solidController.getSolidList)

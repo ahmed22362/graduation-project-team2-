@@ -8,11 +8,13 @@ var petRoute = require("./routes/petRouter")
 var solidRoute = require("./routes/solidRouter")
 var clinicRoute = require("./routes/clinicRouter")
 var userRouter = require("./routes/userRouter")
+
 var ratingRouter = require("./routes/ratingRouter")
 var commentsRouter = require("./routes/commentsRouter")
+
+
 const { storage } = require("./utils/cloudinary")
 
-const chatRouter = require("./routes/chatRouter")
 const socketIO = require("socket.io")
 
 const upload = multer({ storage: storage("photos/public") })
@@ -40,8 +42,12 @@ app.use("/pet", petRoute)
 app.use("/solid", solidRoute)
 app.use("/clinic", clinicRoute)
 app.use("/user", userRouter)
+
 app.use("/comments",commentsRouter)
 app.use("/rating",ratingRouter)
+
+
+
 
 app.use("/upload-image", upload.single("image"), (req, res, next) => {
   if (req.file) {
@@ -58,7 +64,7 @@ app.use("/home", (req, res) => {
 
 //chat
 const server = app.listen(3222, async () => {
-  await validator.isAdminExistAndCreateIt()
+  // await validator.isAdminExistAndCreateIt()
   console.log(`server working on port ${3222}....`)
 })
 
@@ -78,20 +84,3 @@ io.on("connection", (socket) => {
     console.log("Client disconnected")
   })
 })
-app.use("/chat", chatRouter)
-//
-// post('/messages', (req, res) => {
-//   const { senderId, receiverId, messageText } = req.body;
-//   const createdAt = new Date();
-//   const query = 'INSERT INTO messages (sender_id, receiver_id, message_text, created_at) VALUES ($1, $2, $3, $4)';
-//   const values = [senderId, receiverId, messageText, createdAt];
-//
-//   connectino.dbQuery(query, values, (error, result) => {
-//     if (error) {
-//       console.error(error);
-//       res.status(500).send('Error sending message');
-//     } else {
-//       res.status(200).send('Message sent successfully');
-//     }
-//   });
-// });

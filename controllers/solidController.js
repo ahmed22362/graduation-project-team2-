@@ -73,3 +73,25 @@ exports.deleteSolid = async (req, res) => {
     res.status(400).send({ error: `Failed to delete solid ${err.message}` })
   }
 }
+
+exports.addLike = async (req, res) => {
+  req.body.user_id = req.user.id
+  try {
+    const pet = await connection.dbQuery(
+      `update solid set "like" = "like" + 1 where id = '${req.body.solid_id}' returning *`
+    )
+    const like = pet.rows[0]
+    const q = query.insertQuery(
+      "user_solid_favorite",
+      "user_id , solid_id",
+      `${req.user.id}, ${req.body.solid_id}`
+    )
+    await connection.dbQuery(q)
+    res.status(200).json({ status: "success", data: like })
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: `can't like the same post twice: ${error.message}`,
+    })
+  }
+}
